@@ -1,0 +1,76 @@
+import { NextRequest, NextResponse } from "next/server";
+import {
+  getVotes,
+  resetVotes,
+  getCurrentShow,
+  setCurrentShow,
+} from "@/lib/kv";
+import { SHOWS, VOTE_OPTIONS, getShowById } from "@/lib/shows";
+
+function checkAuth(request: NextRequest): boolean {
+  const password = request.headers.get("x-admin-password") || "";
+  const expected = process.env.ADMIN_PASSWORD || "admin123";
+  return password === expected;
+}
+
+export async function GET(request: NextRequest) {
+  if (!checkAuth(request)) {
+    return NextResponse.json({ error: "密码错误" }, { status: 401 });
+  }
+
+  const currentShowId = await getCurrentShow();
+  const allVotes: Record<string, Record<string, number>> = {};
+
+  for (const show of SHOWS) {
+    allVotes[show.id] = await getVotes(show.id);
+  }
+
+  return NextResponse.json({
+    currentShowId,
+    shows: SHOWS,
+    options: VOTE_OPTIONS,
+    votes: allVotes,
+  });
+}
+
+export async function POST(request: NextRequest) {
+  if (!checkAuth(request)) {
+    return NextResponse.json({ error: "密码错误" }, { status: 401 });
+  }
+
+  const { action, showId } = await request.json();
+
+  switch (action) {
+    case "setShow": {
+      const show = getShowById(showId);
+      if (!show) {
+        return NextResponse.json({ error: "节目不存在" }, { status: 400 });
+      }
+      await setCurrentShow(showId);
+      return NextResponse.json({ success: true, currentShowId: showId });
+    }
+
+    case "stopVoting": {
+      await setCurrentShow(null);
+      return NextResponse.json({ success: true, currentShowId: null });
+    }
+
+    case "resetVotes": {
+      if (!showId) {
+        return NextResponse.json({ error: "请指定节目" }, { status: 400 });
+      }
+      await resetVotes(showId);
+      return NextResponse.json({ success: true });
+    }
+
+    case "resetAllVotes": {
+      for (const show of SHOWS) {
+        await resetVotes(show.id);
+      }
+      return NextResponse.json({ success: true });
+    }
+
+    default:
+      return NextResponse.json({ error: "未知操作" }, { status: 400 });
+  }
+}

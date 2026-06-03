@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Bar growth animation */
+.bar-grow {
+  transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Spotlight glow for big screen */
+.spotlight {
+  background: radial-gradient(ellipse at 50% 0%, rgba(212, 168, 83, 0.15) 0%, transparent 60%);
+}
