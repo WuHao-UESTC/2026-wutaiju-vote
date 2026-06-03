@@ -15,8 +15,10 @@ export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [data, setData] = useState<AdminData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState(false);
 
   const fetchData = async (pwd: string) => {
+    setLoginError(false);
     try {
       const res = await fetch("/api/admin", {
         headers: { "x-admin-password": pwd },
@@ -25,10 +27,10 @@ export default function AdminPage() {
         setAuthed(true);
         setData(await res.json());
       } else {
-        alert("密码错误");
+        setLoginError(true);
       }
     } catch {
-      alert("网络错误");
+      setLoginError(true);
     }
   };
 
@@ -47,31 +49,49 @@ export default function AdminPage() {
         await fetchData(password);
       }
     } catch {
-      alert("操作失败");
+      // ignore
     }
     setLoading(false);
   };
 
+  // ====== Login Screen ======
   if (!authed) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm">
-          <h1 className="text-2xl font-bold text-center mb-6">管理后台</h1>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && fetchData(password)}
-            placeholder="请输入管理员密码"
-            className="w-full px-4 py-3 border rounded-xl mb-4 text-center text-lg outline-none focus:ring-2 focus:ring-stage-gold"
-            autoFocus
-          />
-          <button
-            onClick={() => fetchData(password)}
-            className="w-full py-3 bg-stage-gold text-white rounded-xl text-lg font-bold hover:bg-amber-600 transition-colors"
-          >
-            进入
-          </button>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-amber-50/20 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 w-full max-w-sm">
+          <div className="text-center mb-8">
+            <div className="text-5xl mb-4">🎭</div>
+            <h1 className="text-2xl font-bold text-gray-800">管理后台</h1>
+            <p className="text-gray-400 text-sm mt-1">舞台剧投票系统</p>
+          </div>
+
+          <div className="space-y-4">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setLoginError(false);
+              }}
+              onKeyDown={(e) => e.key === "Enter" && fetchData(password)}
+              placeholder="请输入管理员密码"
+              className={`w-full px-5 py-3.5 rounded-2xl border text-center text-base outline-none transition-all ${
+                loginError
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-200 focus:border-stage-gold focus:ring-4 focus:ring-stage-gold/10"
+              }`}
+              autoFocus
+            />
+            {loginError && (
+              <p className="text-red-400 text-sm text-center">密码错误</p>
+            )}
+            <button
+              onClick={() => fetchData(password)}
+              className="w-full py-3.5 bg-gradient-to-r from-stage-gold-dark to-stage-gold text-white rounded-2xl text-base font-bold hover:shadow-lg hover:shadow-stage-gold/20 active:scale-[0.98] transition-all"
+            >
+              进入后台
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -82,23 +102,44 @@ export default function AdminPage() {
   const { currentShowId, shows, options, votes } = data;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">管理后台</h1>
+    <div className="min-h-screen bg-gray-50">
+      {/* Top bar */}
+      <div className="bg-white border-b border-gray-100 sticky top-0 z-10">
+        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🎭</span>
+            <h1 className="text-lg font-bold text-gray-800">管理后台</h1>
+          </div>
+          <div className="flex items-center gap-3">
+            {currentShowId ? (
+              <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 border border-green-200 text-green-700 text-xs font-medium">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                投票中
+              </span>
+            ) : (
+              <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 text-gray-500 text-xs font-medium">
+                <span className="w-2 h-2 rounded-full bg-gray-400" />
+                未开始
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
 
-        {/* Show Control */}
-        <div className="bg-white rounded-2xl shadow p-6 mb-6">
-          <h2 className="text-lg font-bold mb-4">切换节目</h2>
-          <div className="flex flex-wrap gap-3 mb-3">
+      <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
+        {/* Show Selector */}
+        <div className="admin-card">
+          <h2 className="text-base font-bold text-gray-800 mb-4">
+            节目控制
+          </h2>
+          <div className="flex flex-wrap gap-3">
             {shows.map((show) => (
               <button
                 key={show.id}
                 onClick={() => doAction("setShow", show.id)}
                 disabled={loading}
-                className={`px-5 py-3 rounded-xl font-bold text-lg transition-all ${
-                  currentShowId === show.id
-                    ? "bg-stage-gold text-white shadow-lg"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                className={`admin-btn ${
+                  currentShowId === show.id ? "active" : "inactive"
                 }`}
               >
                 {show.name}
@@ -107,87 +148,100 @@ export default function AdminPage() {
             <button
               onClick={() => doAction("stopVoting")}
               disabled={loading}
-              className="px-5 py-3 rounded-xl font-bold text-lg bg-red-100 text-red-600 hover:bg-red-200 transition-all"
+              className="admin-btn danger"
             >
               停止投票
             </button>
           </div>
-          <p className="text-gray-400 text-sm">
-            当前:{" "}
-            {currentShowId
-              ? shows.find((s) => s.id === currentShowId)?.name
-              : "未开始"}
-          </p>
         </div>
 
-        {/* Results per Show */}
+        {/* Results Cards */}
         {shows.map((show) => {
           const showVotes = votes[show.id] || {};
-          const total = Object.values(showVotes).reduce((a, b) => a + b, 0);
+          const total = Object.values(showVotes).reduce(
+            (a: number, b: number) => a + b,
+            0
+          );
+          const maxVal = Math.max(...Object.values(showVotes), 1);
+
           return (
-            <div
-              key={show.id}
-              className="bg-white rounded-2xl shadow p-6 mb-4"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold">{show.name}</h3>
+            <div key={show.id} className="admin-card">
+              <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-3">
-                  <span className="text-gray-400 text-sm">
-                    共 {total} 票
+                  <h3 className="text-lg font-bold text-gray-800">
+                    {show.name}
+                  </h3>
+                  {currentShowId === show.id && (
+                    <span className="px-2 py-0.5 rounded-full bg-stage-gold/15 text-stage-gold-dark text-[11px] font-semibold">
+                      当前
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-gray-400">
+                    {total} 票
                   </span>
                   <button
                     onClick={() => doAction("resetVotes", show.id)}
                     disabled={loading}
-                    className="text-sm text-red-500 hover:text-red-700 transition-colors"
+                    className="text-xs text-red-400 hover:text-red-600 transition-colors font-medium"
                   >
-                    重置
+                    清空
                   </button>
                 </div>
               </div>
-              <div className="space-y-2">
-                {options.map((opt) => (
-                  <div key={opt.id} className="flex items-center gap-3">
-                    <span className="w-28 text-gray-600 text-sm">
-                      {opt.emoji} {opt.label}
-                    </span>
-                    <div className="flex-1 h-6 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-stage-gold rounded-full transition-all duration-500"
-                        style={{
-                          width: `${
-                            total > 0
-                              ? ((showVotes[opt.id] || 0) / total) * 100
-                              : 0
-                          }%`,
-                        }}
-                      />
+
+              <div className="space-y-3">
+                {options.map((opt) => {
+                  const val = showVotes[opt.id] || 0;
+                  return (
+                    <div key={opt.id} className="flex items-center gap-3">
+                      <span className="w-28 text-sm text-gray-500 flex items-center gap-2">
+                        <span>{opt.emoji}</span>
+                        {opt.label}
+                      </span>
+                      <div className="flex-1 h-7 bg-gray-50 rounded-full overflow-hidden border border-gray-100">
+                        <div
+                          className="h-full rounded-full transition-all duration-600"
+                          style={{
+                            width: `${maxVal > 0 ? (val / maxVal) * 100 : 0}%`,
+                            background:
+                              "linear-gradient(90deg, #c8943e 0%, #e2b96f 100%)",
+                          }}
+                        />
+                      </div>
+                      <span className="w-10 text-right text-sm font-bold text-gray-700 tabular-nums">
+                        {val}
+                      </span>
                     </div>
-                    <span className="w-10 text-right font-bold text-sm">
-                      {showVotes[opt.id] || 0}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           );
         })}
 
         {/* Danger Zone */}
-        <div className="bg-red-50 rounded-2xl p-6 border border-red-200">
-          <h3 className="text-lg font-bold text-red-800 mb-2">危险操作</h3>
-          <button
-            onClick={() => {
-              if (
-                confirm("确定要重置所有节目的投票数据吗？此操作不可恢复！")
-              ) {
-                doAction("resetAllVotes");
-              }
-            }}
-            disabled={loading}
-            className="px-5 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-all"
-          >
-            重置全部数据
-          </button>
+        <div className="rounded-2xl p-6 bg-red-50/50 border border-red-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-bold text-red-800">危险操作</h3>
+              <p className="text-sm text-red-400 mt-0.5">
+                重置全部节目的投票数据，不可恢复
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                if (confirm("确定要重置所有投票数据吗？")) {
+                  doAction("resetAllVotes");
+                }
+              }}
+              disabled={loading}
+              className="px-5 py-2.5 rounded-xl bg-red-500 text-white text-sm font-bold hover:bg-red-600 active:scale-[0.97] transition-all"
+            >
+              全部重置
+            </button>
+          </div>
         </div>
       </div>
     </div>

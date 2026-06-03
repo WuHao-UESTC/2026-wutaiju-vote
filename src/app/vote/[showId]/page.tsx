@@ -4,6 +4,27 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { VOTE_OPTIONS, getShowById } from "@/lib/shows";
 
+const CONFETTI_COLORS = [
+  "#c8943e",
+  "#f5d98e",
+  "#e8b96f",
+  "#ffd700",
+  "#f0a050",
+  "#fff3cd",
+  "#d4a853",
+  "#ffe4a0",
+];
+
+interface ConfettiPiece {
+  id: number;
+  color: string;
+  dx: number;
+  dy: number;
+  dr: number;
+  left: number;
+  delay: number;
+}
+
 export default function VotePage() {
   const params = useParams();
   const showId = params.showId as string;
@@ -15,6 +36,7 @@ export default function VotePage() {
   const [submitting, setSubmitting] = useState(false);
   const [voterToken, setVoterToken] = useState("");
   const [error, setError] = useState("");
+  const [confetti, setConfetti] = useState<ConfettiPiece[]>([]);
 
   useEffect(() => {
     const voted = document.cookie.includes(`voted_${showId}=1`);
@@ -41,6 +63,7 @@ export default function VotePage() {
       if (res.ok) {
         document.cookie = `voted_${showId}=1; max-age=86400; path=/`;
         setSubmitted(true);
+        spawnConfetti();
       } else if (res.status === 409) {
         setAlreadyVoted(true);
       } else {
@@ -53,63 +76,172 @@ export default function VotePage() {
     setSubmitting(false);
   };
 
+  const spawnConfetti = () => {
+    const pieces: ConfettiPiece[] = Array.from({ length: 40 }).map(
+      (_, i) => ({
+        id: i,
+        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+        dx: (Math.random() - 0.5) * 400,
+        dy: -(Math.random() * 400 + 100),
+        dr: (Math.random() - 0.5) * 720,
+        left: Math.random() * 100,
+        delay: Math.random() * 0.5,
+      })
+    );
+    setConfetti(pieces);
+  };
+
   if (!show) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <p className="text-xl text-gray-500">节目不存在</p>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-amber-50/30 flex items-center justify-center p-4">
+        <p className="text-xl text-gray-400">节目不存在</p>
       </div>
     );
   }
 
+  // Already voted or success
   if (alreadyVoted || submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-amber-50 flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="text-8xl mb-6 animate-bounce">🎉</div>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 via-amber-50/20 to-amber-50/40 flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Confetti */}
+        {confetti.map((p) => (
+          <div
+            key={p.id}
+            className="confetti-piece"
+            style={{
+              left: `${p.left}%`,
+              top: "50%",
+              backgroundColor: p.color,
+              animationDelay: `${p.delay}s`,
+              "--dx": `${p.dx}px`,
+              "--dy": `${p.dy}px`,
+              "--dr": `${p.dr}deg`,
+            } as React.CSSProperties}
+          />
+        ))}
+
+        <div className="text-center relative z-10 animate-scale-in">
+          {/* Success checkmark */}
+          <div className="mb-6 flex justify-center">
+            <svg
+              width="100"
+              height="100"
+              viewBox="0 0 100 100"
+              className="animate-bounce"
+            >
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="none"
+                stroke="#c8943e"
+                strokeWidth="3"
+                opacity="0.3"
+              />
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="#c8943e"
+                opacity="0.08"
+              />
+              <path
+                d="M30 52 L44 66 L70 38"
+                fill="none"
+                stroke="#c8943e"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeDasharray="50"
+                strokeDashoffset="50"
+                style={{
+                  animation: "checkDraw 0.4s ease-out 0.2s forwards",
+                }}
+              />
+            </svg>
+          </div>
+
           <h1 className="text-3xl font-bold text-gray-800 mb-2">投票成功!</h1>
-          <p className="text-gray-500 text-lg">感谢您的参与</p>
+          <p className="text-gray-400 text-lg">感谢您的参与</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-amber-50 flex flex-col items-center justify-center p-6">
-      <h1 className="text-3xl font-bold text-gray-800 mb-2">{show.name}</h1>
-      <p className="text-gray-400 mb-10 text-lg">请为你喜欢的节目投票</p>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-amber-50/30 flex flex-col items-center justify-center p-5">
+      {/* Show name */}
+      <div className="text-center mb-8 animate-fade-in">
+        <div className="inline-block px-4 py-1.5 rounded-full bg-stage-gold/10 border border-stage-gold/20 text-stage-gold-dark text-xs font-medium tracking-wider mb-4">
+          现场投票
+        </div>
+        <h1 className="text-4xl font-bold text-gray-800 tracking-wide">
+          {show.name}
+        </h1>
+        <p className="text-gray-400 mt-2 text-base">请为你喜欢的节目投票</p>
+      </div>
 
-      <div className="w-full max-w-md space-y-4">
+      {/* Options */}
+      <div className="w-full max-w-md space-y-3 animate-slide-up">
         {VOTE_OPTIONS.map((option) => (
           <button
             key={option.id}
             onClick={() => setSelected(option.id)}
-            className={`w-full p-5 rounded-2xl text-left text-xl font-medium transition-all active:scale-[0.97] ${
-              selected === option.id
-                ? "bg-stage-gold text-white shadow-lg ring-2 ring-stage-gold-light ring-offset-2"
-                : "bg-white text-gray-700 shadow hover:shadow-md active:bg-gray-50"
+            className={`vote-option ${
+              selected === option.id ? "selected" : ""
             }`}
           >
-            <span className="text-2xl mr-4">{option.emoji}</span>
-            {option.label}
+            <span className="emoji">{option.emoji}</span>
+            <span>{option.label}</span>
+            <span className="check-circle" />
           </button>
         ))}
       </div>
 
+      {/* Error */}
       {error && (
-        <p className="mt-4 text-red-500 text-sm">{error}</p>
+        <p className="mt-4 text-red-400 text-sm animate-fade-in">{error}</p>
       )}
 
+      {/* Submit */}
       <button
         onClick={handleSubmit}
         disabled={!selected || submitting}
-        className={`mt-10 px-14 py-4 rounded-full text-xl font-bold transition-all ${
+        className={`mt-8 px-16 py-4 rounded-full text-lg font-bold transition-all duration-300 ${
           selected && !submitting
-            ? "bg-stage-gold text-white shadow-lg hover:shadow-xl active:scale-[0.97]"
-            : "bg-gray-200 text-gray-400 cursor-not-allowed"
+            ? "bg-gradient-to-r from-stage-gold-dark to-stage-gold text-white shadow-lg shadow-stage-gold/25 hover:shadow-xl hover:shadow-stage-gold/30 active:scale-[0.97]"
+            : "bg-gray-100 text-gray-300 cursor-not-allowed"
         }`}
       >
-        {submitting ? "提交中..." : "提交投票"}
+        {submitting ? (
+          <span className="flex items-center gap-2">
+            <svg
+              className="animate-spin h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+            提交中...
+          </span>
+        ) : (
+          "提交投票"
+        )}
       </button>
+
+      <p className="mt-6 text-gray-300 text-xs">每人限投一票</p>
     </div>
   );
 }
