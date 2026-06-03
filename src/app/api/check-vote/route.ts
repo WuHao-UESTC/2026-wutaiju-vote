@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentShow, hasDeviceVoted, hasVoted } from "@/lib/kv";
+import { buildVoterIdentityKeys } from "@/lib/voter-identity";
 
 export const dynamic = "force-dynamic";
 const FINAL_RESULTS_SHOW_ID = "__final__";
@@ -23,12 +24,18 @@ export async function GET(request: NextRequest) {
   }
 
   const voted = await hasVoted(showId, voterToken);
-  const deviceVoted = deviceFingerprint
-    ? await hasDeviceVoted(showId, deviceFingerprint)
-    : false;
+  const voterIdentityKeys = buildVoterIdentityKeys(request, deviceFingerprint);
+  let identityVoted = false;
+
+  for (const identityKey of voterIdentityKeys) {
+    if (await hasDeviceVoted(showId, identityKey)) {
+      identityVoted = true;
+      break;
+    }
+  }
 
   return NextResponse.json({
-    canVote: !voted && !deviceVoted,
-    reason: voted || deviceVoted ? "您已经投过票了" : "",
+    canVote: !voted && !identityVoted,
+    reason: voted || identityVoted ? "您已经投过票了" : "",
   });
 }

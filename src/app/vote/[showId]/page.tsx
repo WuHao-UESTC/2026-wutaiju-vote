@@ -32,8 +32,6 @@ function getDeviceFingerprint(): string {
     longSide,
     Math.round((window.devicePixelRatio || 1) * 100) / 100,
     screen.colorDepth || 0,
-    navigator.maxTouchPoints || 0,
-    navigator.language || "",
     Intl.DateTimeFormat().resolvedOptions().timeZone || "",
   ];
   return parts.join("|");
