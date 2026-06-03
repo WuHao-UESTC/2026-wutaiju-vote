@@ -11,10 +11,10 @@ export const SHOWS: Show[] = [
 ];
 
 export const VOTE_OPTIONS = [
-  { id: "amazing", label: "非常精彩", emoji: "👏" },
-  { id: "good", label: "不错", emoji: "👍" },
-  { id: "ok", label: "一般", emoji: "😊" },
-  { id: "poor", label: "还需努力", emoji: "💪" },
+  { id: "amazing", label: "炽烈回响", emoji: "" },
+  { id: "good", label: "风骨动人", emoji: "" },
+  { id: "ok", label: "意韵悠长", emoji: "" },
+  { id: "poor", label: "尚待淬火", emoji: "" },
 ];
 
 export function getShowById(id: string): Show | undefined {
