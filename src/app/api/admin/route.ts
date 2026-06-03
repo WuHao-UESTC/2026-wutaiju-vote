@@ -7,6 +7,8 @@ import {
 } from "@/lib/kv";
 import { SHOWS, VOTE_OPTIONS, getShowById } from "@/lib/shows";
 
+export const dynamic = "force-dynamic";
+
 function checkAuth(request: NextRequest): boolean {
   const password = request.headers.get("x-admin-password") || "";
   const expected = process.env.ADMIN_PASSWORD || "admin123";

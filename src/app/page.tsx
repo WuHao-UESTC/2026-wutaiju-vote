@@ -28,7 +28,7 @@ export default function BigScreenPage() {
 
   const fetchResults = useCallback(async () => {
     try {
-      const res = await fetch("/api/results");
+      const res = await fetch("/api/results", { cache: "no-store" });
       const json: ResultData = await res.json();
       setData(json);
       if (json.show && !voteUrl) {

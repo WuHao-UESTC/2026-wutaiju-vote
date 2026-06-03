@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { addVote, hasVoted, markVoted } from "@/lib/kv";
 import { VOTE_OPTIONS, getShowById } from "@/lib/shows";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   const { showId, optionId, voterToken } = await request.json();
 

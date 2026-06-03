@@ -1,30 +1,38 @@
+import { Redis } from "@upstash/redis";
+
 const localStore = new Map<string, string>();
 
-function kvEnabled() {
-  return !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+function getRedis(): Redis | null {
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    return new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+  }
+  return null;
 }
 
 async function kvGet(key: string): Promise<string | null> {
-  if (kvEnabled()) {
-    const { kv } = await import("@vercel/kv");
-    return kv.get<string>(key);
+  const redis = getRedis();
+  if (redis) {
+    return redis.get<string>(key);
   }
   return localStore.get(key) ?? null;
 }
 
 async function kvSet(key: string, value: string): Promise<void> {
-  if (kvEnabled()) {
-    const { kv } = await import("@vercel/kv");
-    await kv.set(key, value);
+  const redis = getRedis();
+  if (redis) {
+    await redis.set(key, value);
     return;
   }
   localStore.set(key, value);
 }
 
 async function kvDel(key: string): Promise<void> {
-  if (kvEnabled()) {
-    const { kv } = await import("@vercel/kv");
-    await kv.del(key);
+  const redis = getRedis();
+  if (redis) {
+    await redis.del(key);
     return;
   }
   localStore.delete(key);

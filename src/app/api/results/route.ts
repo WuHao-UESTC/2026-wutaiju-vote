@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getVotes, getCurrentShow } from "@/lib/kv";
 import { VOTE_OPTIONS, getShowById } from "@/lib/shows";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const currentShowId = await getCurrentShow();
 
