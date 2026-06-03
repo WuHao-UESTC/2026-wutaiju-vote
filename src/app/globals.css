@@ -1186,33 +1186,40 @@ button {
 }
 
 @media (max-width: 720px) {
+  .stage-page {
+    height: 100dvh;
+  }
+
   .stage-layout {
-    grid-template-rows: auto minmax(330px, 48vh) minmax(270px, 1fr) auto;
-    gap: 10px;
-    padding: 10px;
+    grid-template-rows: minmax(92px, auto) minmax(0, 42vh) minmax(0, 1fr) 20px;
+    gap: 8px;
+    height: 100dvh;
+    min-height: 0;
+    padding: 8px;
   }
 
   .stage-title-row {
     align-items: center;
     gap: 8px;
-    margin-top: 4px;
+    margin-top: 2px;
   }
 
   .brand-strip {
-    grid-template-columns: 78px 1fr 78px;
-    gap: 8px;
+    grid-template-columns: 58px minmax(0, 1fr) 64px;
+    gap: 7px;
   }
 
   .brand-badges {
-    width: 72px;
+    width: 56px;
   }
 
   .brand-u70 {
-    width: 96px;
+    width: 70px;
   }
 
   .brand-title-art {
     opacity: 0.9;
+    width: min(100%, 360px);
   }
 
   .stage-brand-panel {
@@ -1220,11 +1227,13 @@ button {
   }
 
   .stage-title {
-    font-size: clamp(1.6rem, 7vw, 2.4rem);
+    margin-top: 1px;
+    font-size: clamp(1.35rem, 6vw, 2rem);
   }
 
   .poster-hero {
-    min-height: 330px;
+    min-height: 0;
+    height: 100%;
     border-radius: 0;
   }
 
@@ -1235,9 +1244,9 @@ button {
   }
 
   .poster-hero-image {
-    height: min(50vh, 520px);
-    max-width: 104vw;
-    transform: scale(1.08);
+    height: 100%;
+    max-width: 112vw;
+    transform: scale(1.06);
   }
 
   .idle-brand-strip {
@@ -1280,31 +1289,43 @@ button {
   }
 
   .stage-kicker {
-    font-size: 0.68rem;
-    letter-spacing: 0.18em;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
   }
 
   .total-panel {
-    min-width: 82px;
-    padding: 8px 9px;
+    min-width: 74px;
+    padding: 6px 8px;
   }
 
   .total-panel span {
-    font-size: 0.62rem;
+    font-size: 0.56rem;
+    letter-spacing: 0.12em;
+  }
+
+  .total-panel strong {
+    font-size: clamp(1.55rem, 8vw, 2.2rem);
+  }
+
+  .result-board {
+    grid-template-rows: repeat(4, minmax(42px, 1fr));
+    gap: 6px;
+    min-height: 0;
+    padding: 8px;
   }
 
   .result-row {
-    grid-template-columns: minmax(92px, 29%) 1fr minmax(62px, 16%);
-    gap: 7px;
-    padding: 8px 12px;
+    grid-template-columns: minmax(86px, 30%) 1fr minmax(58px, 16%);
+    gap: 6px;
+    padding: 6px 9px;
   }
 
   .result-label {
-    gap: 7px;
+    gap: 6px;
   }
 
   .result-label strong {
-    font-size: 1rem;
+    font-size: clamp(0.94rem, 4vw, 1.12rem);
   }
 
   .result-rank {
@@ -1312,15 +1333,22 @@ button {
   }
 
   .result-meter {
-    height: 28px;
+    height: clamp(20px, 4.7vh, 27px);
   }
 
   .result-count strong {
-    font-size: 1.45rem;
+    font-size: clamp(1.18rem, 6vw, 1.55rem);
   }
 
   .result-count span {
-    font-size: 0.62rem;
-    letter-spacing: 0.08em;
+    font-size: 0.56rem;
+    letter-spacing: 0.04em;
+  }
+
+  .stage-footer {
+    min-height: 0;
+    padding-top: 4px;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
   }
 }

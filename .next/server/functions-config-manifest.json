@@ -1,1 +1,1 @@
-{"version":1,"functions":{"/api/check-vote":{},"/api/final-results":{},"/api/vote":{},"/api/results":{},"/api/admin":{}}}
+{"version":1,"functions":{"/api/final-results":{},"/api/results":{},"/api/check-vote":{},"/api/admin":{},"/api/vote":{}}}

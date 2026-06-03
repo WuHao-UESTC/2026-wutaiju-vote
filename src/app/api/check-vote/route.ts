@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentShow, hasVoted } from "@/lib/kv";
+import { getCurrentShow, hasDeviceVoted, hasVoted } from "@/lib/kv";
 
 export const dynamic = "force-dynamic";
 const FINAL_RESULTS_SHOW_ID = "__final__";
@@ -7,6 +7,7 @@ const FINAL_RESULTS_SHOW_ID = "__final__";
 export async function GET(request: NextRequest) {
   const showId = request.nextUrl.searchParams.get("showId");
   const voterToken = request.nextUrl.searchParams.get("voterToken");
+  const deviceFingerprint = request.nextUrl.searchParams.get("deviceFingerprint");
 
   if (!showId || !voterToken) {
     return NextResponse.json({ canVote: false, reason: "参数不完整" });
@@ -22,8 +23,12 @@ export async function GET(request: NextRequest) {
   }
 
   const voted = await hasVoted(showId, voterToken);
+  const deviceVoted = deviceFingerprint
+    ? await hasDeviceVoted(showId, deviceFingerprint)
+    : false;
+
   return NextResponse.json({
-    canVote: !voted,
-    reason: voted ? "您已经投过票了" : "",
+    canVote: !voted && !deviceVoted,
+    reason: voted || deviceVoted ? "您已经投过票了" : "",
   });
 }

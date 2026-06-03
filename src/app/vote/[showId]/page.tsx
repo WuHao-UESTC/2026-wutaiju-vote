@@ -23,12 +23,17 @@ interface ConfettiPiece {
 }
 
 function getDeviceFingerprint(): string {
+  const screenWidth = Math.round(screen.width || 0);
+  const screenHeight = Math.round(screen.height || 0);
+  const shortSide = Math.min(screenWidth, screenHeight);
+  const longSide = Math.max(screenWidth, screenHeight);
   const parts = [
-    screen.width,
-    screen.height,
-    window.devicePixelRatio || 1,
-    navigator.platform || "",
-    navigator.hardwareConcurrency || 0,
+    shortSide,
+    longSide,
+    Math.round((window.devicePixelRatio || 1) * 100) / 100,
+    screen.colorDepth || 0,
+    navigator.maxTouchPoints || 0,
+    navigator.language || "",
     Intl.DateTimeFormat().resolvedOptions().timeZone || "",
   ];
   return parts.join("|");
@@ -77,7 +82,12 @@ export default function VotePage() {
 
     async function check() {
       try {
-        const res = await fetch(`/api/check-vote?showId=${showId}&voterToken=${token}`);
+        const query = new URLSearchParams({
+          showId,
+          voterToken: token ?? "",
+          deviceFingerprint: deviceFingerprint.current,
+        });
+        const res = await fetch(`/api/check-vote?${query.toString()}`);
         const data = await res.json();
         if (!data.canVote) {
           if (data.reason === "您已经投过票了") {
@@ -95,11 +105,7 @@ export default function VotePage() {
       setChecking(false);
     }
 
-    if (hasCookie) {
-      check();
-    } else {
-      setChecking(false);
-    }
+    check();
   }, [showId]);
 
   const spawnConfetti = () => {
