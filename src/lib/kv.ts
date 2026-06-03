@@ -1,6 +1,10 @@
 import { Redis } from "@upstash/redis";
+import { mkdir, readFile, rename, writeFile } from "fs/promises";
+import path from "path";
 
-const localStore = new Map<string, string>();
+const localStorePath = path.join(process.cwd(), ".data", "vote-store.json");
+let localWriteQueue = Promise.resolve();
+let localCache: Record<string, string> | null = null;
 
 function getRedis(): Redis | null {
   if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
@@ -15,7 +19,8 @@ function getRedis(): Redis | null {
 async function kvGet(key: string): Promise<string | null> {
   const redis = getRedis();
   if (redis) return redis.get<string>(key);
-  return localStore.get(key) ?? null;
+  const store = await readLocalStore();
+  return store[key] ?? null;
 }
 
 async function kvSet(key: string, value: string): Promise<void> {
@@ -24,7 +29,9 @@ async function kvSet(key: string, value: string): Promise<void> {
     await redis.set(key, value);
     return;
   }
-  localStore.set(key, value);
+  await updateLocalStore((store) => {
+    store[key] = value;
+  });
 }
 
 async function kvDel(key: string): Promise<void> {
@@ -33,7 +40,41 @@ async function kvDel(key: string): Promise<void> {
     await redis.del(key);
     return;
   }
-  localStore.delete(key);
+  await updateLocalStore((store) => {
+    delete store[key];
+  });
+}
+
+async function readLocalStore(): Promise<Record<string, string>> {
+  if (localCache) return localCache;
+
+  try {
+    const data = await readFile(localStorePath, "utf8");
+    localCache = JSON.parse(data) as Record<string, string>;
+  } catch {
+    localCache = {};
+  }
+
+  return localCache;
+}
+
+async function writeLocalStore(store: Record<string, string>): Promise<void> {
+  const dir = path.dirname(localStorePath);
+  const tempPath = `${localStorePath}.${process.pid}.tmp`;
+  await mkdir(dir, { recursive: true });
+  await writeFile(tempPath, JSON.stringify(store, null, 2), "utf8");
+  await rename(tempPath, localStorePath);
+}
+
+async function updateLocalStore(mutator: (store: Record<string, string>) => void): Promise<void> {
+  localWriteQueue = localWriteQueue.then(async () => {
+    localCache = null;
+    const store = await readLocalStore();
+    mutator(store);
+    localCache = store;
+    await writeLocalStore(store);
+  });
+  await localWriteQueue;
 }
 
 // ====== Vote counts ======
