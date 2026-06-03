@@ -5,6 +5,12 @@ import { useParams } from "next/navigation";
 import { VOTE_OPTIONS, getShowById } from "@/lib/shows";
 
 const CONFETTI_COLORS = ["#b40f1d", "#e83535", "#d9a84f", "#f7df99", "#7d0b13", "#fff2c4"];
+const OPTION_SCORES: Record<string, number> = {
+  amazing: 4,
+  good: 3,
+  ok: 2,
+  poor: 1,
+};
 
 interface ConfettiPiece {
   id: number;
@@ -48,6 +54,8 @@ export default function VotePage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [alreadyVoted, setAlreadyVoted] = useState(false);
+  const [votingClosed, setVotingClosed] = useState(false);
+  const [closedReason, setClosedReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [voterToken, setVoterToken] = useState("");
   const [error, setError] = useState("");
@@ -72,7 +80,12 @@ export default function VotePage() {
         const res = await fetch(`/api/check-vote?showId=${showId}&voterToken=${token}`);
         const data = await res.json();
         if (!data.canVote) {
-          setAlreadyVoted(true);
+          if (data.reason === "您已经投过票了") {
+            setAlreadyVoted(true);
+          } else {
+            setVotingClosed(true);
+            setClosedReason(data.reason || "当前暂未开放投票");
+          }
         }
       } catch {
         if (hasCookie) {
@@ -123,6 +136,10 @@ export default function VotePage() {
         spawnConfetti();
       } else if (res.status === 409) {
         setAlreadyVoted(true);
+      } else if (res.status === 403) {
+        const json = await res.json();
+        setVotingClosed(true);
+        setClosedReason(json.error || "当前暂未开放投票");
       } else {
         const json = await res.json();
         setError(json.error || "投票失败，请重试");
@@ -145,6 +162,19 @@ export default function VotePage() {
     return (
       <main className="vote-page flex min-h-screen items-center justify-center p-5 text-white">
         <p className="text-xl font-semibold">节目不存在</p>
+      </main>
+    );
+  }
+
+  if (votingClosed) {
+    return (
+      <main className="vote-page relative flex min-h-screen items-center justify-center overflow-hidden p-5 text-white">
+        <section className="vote-success animate-scale-in">
+          <VoteBrand />
+          <p className="stage-kicker mt-6">现场投票</p>
+          <h1 className="mt-3 text-3xl font-black">暂不可投票</h1>
+          <p className="mt-3 text-white/68">{closedReason || "请等待管理员开启投票"}</p>
+        </section>
       </main>
     );
   }
@@ -213,7 +243,9 @@ export default function VotePage() {
               onClick={() => setSelected(option.id)}
               className={`vote-option ${selected === option.id ? "selected" : ""}`}
             >
-              <span className="option-text">{option.label}</span>
+              <span className="option-text">
+                {option.label}（{OPTION_SCORES[option.id]}分）
+              </span>
               <span className="check-circle" />
             </button>
           ))}

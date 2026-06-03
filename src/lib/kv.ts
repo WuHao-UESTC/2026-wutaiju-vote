@@ -49,6 +49,16 @@ export async function addVote(showId: string, optionId: string): Promise<void> {
   await kvSet(`votes:${showId}`, JSON.stringify(votes));
 }
 
+export async function setVoteCount(
+  showId: string,
+  optionId: string,
+  count: number
+): Promise<void> {
+  const votes = await getVotes(showId);
+  votes[optionId] = Math.max(0, Math.floor(count));
+  await kvSet(`votes:${showId}`, JSON.stringify(votes));
+}
+
 export async function resetVotes(showId: string): Promise<void> {
   await kvSet(`votes:${showId}`, "{}");
   await kvDel(`voters:${showId}`);
