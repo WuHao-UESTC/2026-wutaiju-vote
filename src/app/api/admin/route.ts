@@ -4,6 +4,7 @@ import {
   resetVotes,
   getCurrentShow,
   setCurrentShow,
+  enableRevote,
 } from "@/lib/kv";
 import { SHOWS, VOTE_OPTIONS, getShowById } from "@/lib/shows";
 
@@ -69,6 +70,14 @@ export async function POST(request: NextRequest) {
       for (const show of SHOWS) {
         await resetVotes(show.id);
       }
+      return NextResponse.json({ success: true });
+    }
+
+    case "enableRevote": {
+      if (!showId) {
+        return NextResponse.json({ error: "请指定节目" }, { status: 400 });
+      }
+      await enableRevote(showId);
       return NextResponse.json({ success: true });
     }
 

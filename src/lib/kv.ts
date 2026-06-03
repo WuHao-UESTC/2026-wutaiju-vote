@@ -90,3 +90,7 @@ export async function markVoted(
   voters[voterToken] = true;
   await kvSet(`voters:${showId}`, JSON.stringify(voters));
 }
+
+export async function enableRevote(showId: string): Promise<void> {
+  await kvDel(`voters:${showId}`);
+}

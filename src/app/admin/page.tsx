@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { SHOWS, VOTE_OPTIONS } from "@/lib/shows";
+import Link from "next/link";
 
 interface AdminData {
   currentShowId: string | null;
@@ -111,6 +112,12 @@ export default function AdminPage() {
             <h1 className="text-lg font-bold text-gray-800">管理后台</h1>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              href="/admin/qrcodes"
+              className="text-xs text-gray-400 hover:text-stage-gold transition-colors"
+            >
+              二维码
+            </Link>
             {currentShowId ? (
               <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 border border-green-200 text-green-700 text-xs font-medium">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -129,9 +136,7 @@ export default function AdminPage() {
       <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
         {/* Show Selector */}
         <div className="admin-card">
-          <h2 className="text-base font-bold text-gray-800 mb-4">
-            节目控制
-          </h2>
+          <h2 className="text-base font-bold text-gray-800 mb-4">节目控制</h2>
           <div className="flex flex-wrap gap-3">
             {shows.map((show) => (
               <button
@@ -177,16 +182,22 @@ export default function AdminPage() {
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-400">
-                    {total} 票
-                  </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-400">{total} 票</span>
+                  <button
+                    onClick={() => doAction("enableRevote", show.id)}
+                    disabled={loading}
+                    className="text-xs text-stage-gold hover:text-stage-gold-dark transition-colors font-medium"
+                    title="清除投票记录，允许观众重新投票"
+                  >
+                    允许重投
+                  </button>
                   <button
                     onClick={() => doAction("resetVotes", show.id)}
                     disabled={loading}
                     className="text-xs text-red-400 hover:text-red-600 transition-colors font-medium"
                   >
-                    清空
+                    清空票数
                   </button>
                 </div>
               </div>

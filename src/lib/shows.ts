@@ -4,10 +4,10 @@ export interface Show {
 }
 
 export const SHOWS: Show[] = [
-  { id: "1", name: "第一幕" },
-  { id: "2", name: "第二幕" },
-  { id: "3", name: "第三幕" },
-  { id: "4", name: "第四幕" },
+  { id: "1", name: "觉醒之声" },
+  { id: "2", name: "延乔路上的黎明" },
+  { id: "3", name: "赤水挽澜" },
+  { id: "4", name: "寒夜抉择" },
 ];
 
 export const VOTE_OPTIONS = [

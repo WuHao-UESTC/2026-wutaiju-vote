@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { QRCodeSVG } from "qrcode.react";
 
 interface ShowInfo {
   id: string;
@@ -24,7 +23,6 @@ interface ResultData {
 
 export default function BigScreenPage() {
   const [data, setData] = useState<ResultData | null>(null);
-  const [voteUrl, setVoteUrl] = useState("");
   const [visible, setVisible] = useState(false);
   const prevShowId = useRef<string | null>(null);
 
@@ -33,7 +31,6 @@ export default function BigScreenPage() {
       const res = await fetch("/api/results", { cache: "no-store" });
       const json: ResultData = await res.json();
 
-      // Detect show change for entrance animation
       if (json.show && json.show.id !== prevShowId.current) {
         setVisible(false);
         setTimeout(() => setVisible(true), 50);
@@ -41,11 +38,6 @@ export default function BigScreenPage() {
       prevShowId.current = json.show?.id ?? null;
 
       setData(json);
-      if (json.show) {
-        setVoteUrl(`${window.location.origin}/vote/${json.show.id}`);
-      } else {
-        setVoteUrl("");
-      }
     } catch {
       // silently retry
     }
@@ -65,7 +57,6 @@ export default function BigScreenPage() {
   if (!data || !data.show || !data.options) {
     return (
       <div className="min-h-screen stage-bg flex items-center justify-center relative overflow-hidden">
-        {/* Particles */}
         <div className="particles">
           {Array.from({ length: 12 }).map((_, i) => (
             <div key={i} className="particle" />
@@ -121,25 +112,37 @@ export default function BigScreenPage() {
           </h1>
         </div>
 
-        {/* QR Code + Bar Chart */}
+        {/* Poster + Bar Chart */}
         <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16 w-full">
-          {/* QR Code Card */}
+          {/* Poster Placeholder */}
           <div className="flex-shrink-0 text-center">
             <div
-              className="qr-card animate-qr-pulse"
-              style={{ animation: "qrPulse 3s ease-in-out infinite" }}
+              className="relative overflow-hidden border-2 border-stage-gold/20 bg-stage-card"
+              style={{
+                width: "160px",
+                height: "360px",
+              }}
             >
-              {voteUrl && (
-                <QRCodeSVG
-                  value={voteUrl}
-                  size={200}
-                  level="M"
-                  fgColor="#1a1a2e"
-                />
-              )}
+              {/* Poster inner frame */}
+              <div className="absolute inset-3 border border-stage-gold/10 flex flex-col items-center justify-center gap-4">
+                <span className="text-5xl">🎬</span>
+                <div className="text-center px-3">
+                  <p className="text-stage-gold/60 text-xs tracking-widest leading-relaxed">
+                    节 目 海 报
+                  </p>
+                  <p className="text-white/30 text-[10px] mt-2 leading-relaxed">
+                    {data.show.name}
+                  </p>
+                </div>
+              </div>
+              {/* Decorative corner accents */}
+              <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-stage-gold/30" />
+              <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-stage-gold/30" />
+              <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-stage-gold/30" />
+              <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-stage-gold/30" />
             </div>
-            <p className="text-gray-400 text-sm mt-4 tracking-wider">
-              扫码投票
+            <p className="text-gray-500 text-xs mt-3 tracking-wider">
+              {data.show.name}
             </p>
           </div>
 
@@ -164,12 +167,8 @@ export default function BigScreenPage() {
                 {/* Bar */}
                 <div className="flex-1 h-10 md:h-14 bar-track overflow-hidden">
                   <div
-                    className={`h-full bar-fill ${
-                      index === 0 ? "leading" : ""
-                    }`}
-                    style={{
-                      width: `${option.barWidth}%`,
-                    }}
+                    className={`h-full bar-fill ${index === 0 ? "leading" : ""}`}
+                    style={{ width: `${option.barWidth}%` }}
                   />
                 </div>
 
@@ -178,9 +177,7 @@ export default function BigScreenPage() {
                   <span className="text-2xl md:text-3xl font-bold text-stage-gold-light tabular-nums">
                     {option.count}
                   </span>
-                  <span className="text-xs md:text-sm text-gray-500 ml-1">
-                    票
-                  </span>
+                  <span className="text-xs md:text-sm text-gray-500 ml-1">票</span>
                 </div>
               </div>
             ))}
@@ -189,20 +186,14 @@ export default function BigScreenPage() {
 
         {/* Total */}
         <div className="mt-10 md:mt-14 text-center">
-          <span className="text-gray-500 text-sm tracking-wider mr-3">
-            累 计
-          </span>
+          <span className="text-gray-500 text-sm tracking-wider mr-3">累 计</span>
           <span
             className="text-stage-gold text-4xl md:text-6xl font-bold tabular-nums"
-            style={{
-              textShadow: "0 0 30px rgba(200,148,62,0.25)",
-            }}
+            style={{ textShadow: "0 0 30px rgba(200,148,62,0.25)" }}
           >
             {data.total}
           </span>
-          <span className="text-gray-500 text-sm tracking-wider ml-3">
-            票
-          </span>
+          <span className="text-gray-500 text-sm tracking-wider ml-3">票</span>
         </div>
       </div>
 

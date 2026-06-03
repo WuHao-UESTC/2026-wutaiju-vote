@@ -37,17 +37,42 @@ export default function VotePage() {
   const [voterToken, setVoterToken] = useState("");
   const [error, setError] = useState("");
   const [confetti, setConfetti] = useState<ConfettiPiece[]>([]);
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    const voted = document.cookie.includes(`voted_${showId}=1`);
-    if (voted) setAlreadyVoted(true);
-
     let token = localStorage.getItem(`voter_token_${showId}`);
     if (!token) {
       token = crypto.randomUUID();
       localStorage.setItem(`voter_token_${showId}`, token);
     }
     setVoterToken(token);
+
+    // Check if user can still vote (cookie may be stale after admin reset)
+    const hasCookie = document.cookie.includes(`voted_${showId}=1`);
+
+    async function check() {
+      try {
+        const res = await fetch(
+          `/api/check-vote?showId=${showId}&voterToken=${token}`
+        );
+        const data = await res.json();
+        if (!data.canVote) {
+          setAlreadyVoted(true);
+        }
+      } catch {
+        // If check fails, fall back to cookie
+        if (hasCookie) {
+          setAlreadyVoted(true);
+        }
+      }
+      setChecking(false);
+    }
+
+    if (hasCookie) {
+      check();
+    } else {
+      setChecking(false);
+    }
   }, [showId]);
 
   const handleSubmit = async () => {
@@ -91,6 +116,15 @@ export default function VotePage() {
     setConfetti(pieces);
   };
 
+  // Loading
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-amber-50/30 flex items-center justify-center p-4">
+        <div className="animate-spin w-8 h-8 border-2 border-stage-gold border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
   if (!show) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-amber-50/30 flex items-center justify-center p-4">
@@ -103,7 +137,6 @@ export default function VotePage() {
   if (alreadyVoted || submitted) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 via-amber-50/20 to-amber-50/40 flex items-center justify-center p-4 relative overflow-hidden">
-        {/* Confetti */}
         {confetti.map((p) => (
           <div
             key={p.id}
@@ -121,7 +154,6 @@ export default function VotePage() {
         ))}
 
         <div className="text-center relative z-10 animate-scale-in">
-          {/* Success checkmark */}
           <div className="mb-6 flex justify-center">
             <svg
               width="100"
@@ -138,13 +170,7 @@ export default function VotePage() {
                 strokeWidth="3"
                 opacity="0.3"
               />
-              <circle
-                cx="50"
-                cy="50"
-                r="45"
-                fill="#c8943e"
-                opacity="0.08"
-              />
+              <circle cx="50" cy="50" r="45" fill="#c8943e" opacity="0.08" />
               <path
                 d="M30 52 L44 66 L70 38"
                 fill="none"
@@ -161,8 +187,12 @@ export default function VotePage() {
             </svg>
           </div>
 
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">投票成功!</h1>
-          <p className="text-gray-400 text-lg">感谢您的参与</p>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            {submitted ? "投票成功!" : "您已投过票"}
+          </h1>
+          <p className="text-gray-400 text-lg">
+            {submitted ? "感谢您的参与" : "每人限投一票"}
+          </p>
         </div>
       </div>
     );
@@ -170,7 +200,6 @@ export default function VotePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-amber-50/30 flex flex-col items-center justify-center p-5">
-      {/* Show name */}
       <div className="text-center mb-8 animate-fade-in">
         <div className="inline-block px-4 py-1.5 rounded-full bg-stage-gold/10 border border-stage-gold/20 text-stage-gold-dark text-xs font-medium tracking-wider mb-4">
           现场投票
@@ -181,7 +210,6 @@ export default function VotePage() {
         <p className="text-gray-400 mt-2 text-base">请为你喜欢的节目投票</p>
       </div>
 
-      {/* Options */}
       <div className="w-full max-w-md space-y-3 animate-slide-up">
         {VOTE_OPTIONS.map((option) => (
           <button
@@ -198,12 +226,10 @@ export default function VotePage() {
         ))}
       </div>
 
-      {/* Error */}
       {error && (
         <p className="mt-4 text-red-400 text-sm animate-fade-in">{error}</p>
       )}
 
-      {/* Submit */}
       <button
         onClick={handleSubmit}
         disabled={!selected || submitting}
