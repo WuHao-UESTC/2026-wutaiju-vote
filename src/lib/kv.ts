@@ -11,6 +11,8 @@ function getRedis(): Redis | null {
     return new Redis({
       url: process.env.UPSTASH_REDIS_REST_URL,
       token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      automaticDeserialization: false,
+      readYourWrites: true,
     });
   }
   return null;
