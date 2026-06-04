@@ -5,17 +5,23 @@ import path from "path";
 const localStorePath = path.join(process.cwd(), ".data", "vote-store.json");
 let localWriteQueue = Promise.resolve();
 let localCache: Record<string, string> | null = null;
+let redisClient: Redis | null | undefined;
 
 function getRedis(): Redis | null {
+  if (redisClient !== undefined) return redisClient;
+
   if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-    return new Redis({
+    redisClient = new Redis({
       url: process.env.UPSTASH_REDIS_REST_URL,
       token: process.env.UPSTASH_REDIS_REST_TOKEN,
       automaticDeserialization: false,
       readYourWrites: true,
     });
+    return redisClient;
   }
-  return null;
+
+  redisClient = null;
+  return redisClient;
 }
 
 async function kvGet(key: string): Promise<string | null> {

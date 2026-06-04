@@ -54,12 +54,22 @@ export default function AdminPage() {
         body: JSON.stringify({ action, ...payload }),
       });
       if (res.ok) {
+        const json = await res.json();
+        if ("currentShowId" in json) {
+          setData((current) =>
+            current ? { ...current, currentShowId: json.currentShowId } : current
+          );
+          setLoading(false);
+          void fetchData(password);
+          return;
+        }
         await fetchData(password);
       }
     } catch {
       // keep UI state; next manual refresh will recover
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const updateDraftVote = (showId: string, optionId: string, value: string) => {

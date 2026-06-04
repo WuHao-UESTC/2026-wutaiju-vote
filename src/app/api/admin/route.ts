@@ -24,11 +24,10 @@ export async function GET(request: NextRequest) {
   }
 
   const currentShowId = await getCurrentShow();
-  const allVotes: Record<string, Record<string, number>> = {};
-
-  for (const show of SHOWS) {
-    allVotes[show.id] = await getVotes(show.id);
-  }
+  const voteEntries = await Promise.all(
+    SHOWS.map(async (show) => [show.id, await getVotes(show.id)] as const)
+  );
+  const allVotes = Object.fromEntries(voteEntries);
 
   return NextResponse.json({
     currentShowId,
