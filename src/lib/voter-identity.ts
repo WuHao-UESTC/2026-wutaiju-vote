@@ -14,7 +14,6 @@ export function getClientIp(request: NextRequest): string {
 export function buildVoterIdentityKeys(request: NextRequest, deviceFingerprint?: string | null): string[] {
   const ip = getClientIp(request);
   const fingerprint = deviceFingerprint?.trim();
-  const userAgent = request.headers.get("user-agent") || "";
   const keys = new Set<string>();
 
   if (fingerprint) {
@@ -24,19 +23,6 @@ export function buildVoterIdentityKeys(request: NextRequest, deviceFingerprint?:
 
   if (ip && fingerprint) {
     keys.add(`ip-fp:${cleanPart(ip)}:${cleanPart(fingerprint)}`);
-  }
-
-  if (ip) {
-    keys.add(`ip:${cleanPart(ip)}`);
-  }
-
-  if (ip && userAgent) {
-    const mobileFamily = /iphone|ipad|ipod/i.test(userAgent)
-      ? "ios"
-      : /android/i.test(userAgent)
-        ? "android"
-        : "unknown";
-    keys.add(`ip-mobile:${cleanPart(ip)}:${mobileFamily}`);
   }
 
   return [...keys];

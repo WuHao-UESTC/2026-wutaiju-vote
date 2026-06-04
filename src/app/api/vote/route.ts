@@ -1,12 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  addVote,
-  getCurrentShow,
-  hasDeviceVoted,
-  hasVoted,
-  markDeviceVoted,
-  markVoted,
-} from "@/lib/kv";
+import { getCurrentShow, submitVote } from "@/lib/kv";
 import { VOTE_OPTIONS, getShowById } from "@/lib/shows";
 import { buildVoterIdentityKeys } from "@/lib/voter-identity";
 
@@ -39,27 +32,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "投票选项不存在" }, { status: 400 });
   }
 
-  const alreadyVoted = await hasVoted(showId, voterToken);
-  if (alreadyVoted) {
-    return NextResponse.json({ error: "您已经投过票了" }, { status: 409 });
-  }
-
   const voterIdentityKeys = buildVoterIdentityKeys(request, deviceFingerprint);
   if (voterIdentityKeys.length === 0) {
     return NextResponse.json({ error: "无法识别投票设备" }, { status: 400 });
   }
 
-  for (const identityKey of voterIdentityKeys) {
-    const identityVoted = await hasDeviceVoted(showId, identityKey);
-    if (identityVoted) {
-      return NextResponse.json({ error: "该设备已经投过票" }, { status: 409 });
-    }
+  const result = await submitVote(showId, optionId, voterToken, voterIdentityKeys);
+  if (result === "duplicate") {
+    return NextResponse.json({ error: "您已经投过票了" }, { status: 409 });
   }
-
-  await addVote(showId, optionId);
-  await markVoted(showId, voterToken);
-  for (const identityKey of voterIdentityKeys) {
-    await markDeviceVoted(showId, identityKey);
+  if (result === "closed") {
+    return NextResponse.json({ error: "当前节目未开放投票" }, { status: 403 });
   }
 
   return NextResponse.json({ success: true });

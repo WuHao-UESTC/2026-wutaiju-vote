@@ -3,11 +3,11 @@
   "/admin/page": "app/admin/page.js",
   "/admin/qrcodes/page": "app/admin/qrcodes/page.js",
   "/final/page": "app/final/page.js",
-  "/vote/[showId]/page": "app/vote/[showId]/page.js",
   "/page": "app/page.js",
+  "/vote/[showId]/page": "app/vote/[showId]/page.js",
   "/api/check-vote/route": "app/api/check-vote/route.js",
-  "/api/admin/route": "app/api/admin/route.js",
+  "/api/vote/route": "app/api/vote/route.js",
   "/api/final-results/route": "app/api/final-results/route.js",
-  "/api/results/route": "app/api/results/route.js",
-  "/api/vote/route": "app/api/vote/route.js"
+  "/api/admin/route": "app/api/admin/route.js",
+  "/api/results/route": "app/api/results/route.js"
 }
