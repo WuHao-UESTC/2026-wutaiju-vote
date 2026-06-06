@@ -1784,6 +1784,175 @@ button {
   text-shadow: 0 0 24px rgba(255, 206, 93, 0.32);
 }
 
+@media (min-width: 1600px) and (min-height: 900px) {
+  .fullscreen-button {
+    top: 24px;
+    right: 28px;
+  }
+
+  .stage-layout,
+  .final-layout {
+    width: min(100%, 1920px);
+    height: min(100vh, 1080px);
+    margin: 0 auto;
+    padding: 24px 42px 18px;
+  }
+
+  .stage-layout {
+    grid-template-columns: 560px minmax(0, 1fr);
+    grid-template-rows: 228px minmax(0, 1fr) 28px;
+    -moz-column-gap: 32px;
+         column-gap: 32px;
+    row-gap: 18px;
+  }
+
+  .stage-brand-panel {
+    padding: 0;
+  }
+
+  .brand-strip {
+    grid-template-columns: 210px minmax(0, 1fr) 240px;
+    gap: 30px;
+    max-width: 1260px;
+  }
+
+  .brand-badges {
+    width: 210px;
+  }
+
+  .brand-u70 {
+    width: 240px;
+  }
+
+  .stage-title-row {
+    gap: 34px;
+    margin-top: 12px;
+  }
+
+  .stage-title {
+    font-size: 4.25rem;
+  }
+
+  .stage-kicker {
+    font-size: 0.95rem;
+  }
+
+  .total-panel {
+    min-width: 186px;
+    padding: 14px 24px 16px;
+  }
+
+  .total-panel strong {
+    font-size: 4.3rem;
+  }
+
+  .poster-hero-image {
+    height: 1038px;
+    max-width: 520px;
+  }
+
+  .result-board {
+    grid-template-rows: repeat(4, 1fr);
+    gap: 20px;
+    padding: 28px;
+  }
+
+  .result-row {
+    grid-template-columns: 260px minmax(0, 1fr) 150px;
+    gap: 22px;
+    padding: 20px 30px;
+  }
+
+  .result-label strong {
+    font-size: 2.35rem;
+  }
+
+  .result-meter {
+    height: 58px;
+  }
+
+  .result-count strong {
+    font-size: 4.1rem;
+  }
+
+  .stage-footer {
+    align-self: end;
+    padding-top: 10px;
+    font-size: 0.82rem;
+  }
+
+  .final-layout {
+    grid-template-columns: 520px minmax(0, 1fr);
+    grid-template-rows: 214px minmax(0, 1fr) 28px;
+    -moz-column-gap: 48px;
+         column-gap: 48px;
+    row-gap: 18px;
+  }
+
+  .final-poster-card {
+    height: 1030px;
+    max-width: 500px;
+  }
+
+  .final-brand-panel {
+    align-self: start;
+    padding-top: 4px;
+  }
+
+  .final-brand-strip {
+    grid-template-columns: 190px minmax(0, 1fr) 224px;
+    max-width: 1250px;
+  }
+
+  .final-score-board {
+    grid-template-rows: repeat(4, 1fr);
+    gap: 20px;
+    padding: 28px;
+  }
+
+  .final-score-row {
+    grid-template-columns: 320px minmax(0, 1fr) 150px;
+    gap: 22px;
+    padding: 20px 30px;
+  }
+
+  .final-show-meta strong {
+    font-size: 2.35rem;
+  }
+
+  .final-score-meter {
+    height: 62px;
+  }
+
+  .final-score-number strong {
+    font-size: 4rem;
+  }
+
+  .idle-title-box {
+    top: 150px;
+  }
+
+  .idle-title-box .brand-title-art {
+    width: min(94vw, 1760px);
+  }
+
+  .idle-badge-layer .brand-badges {
+    top: 32px;
+    left: 48px;
+    width: 260px;
+  }
+
+  .idle-badge-layer .brand-u70 {
+    top: 32px;
+    right: 48px;
+    width: 310px;
+  }
+
+  .idle-stage .gold-medallion {
+    margin-top: 250px;
+  }
+}
+
 .vote-page {
   background:
     radial-gradient(circle at 50% 100%, rgba(255, 218, 104, 0.34), transparent 32%),
