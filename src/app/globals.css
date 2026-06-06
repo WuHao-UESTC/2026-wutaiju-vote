@@ -211,31 +211,47 @@ button {
   opacity: 1;
 }
 
-.idle-brand-strip {
-  position: static;
-  width: min(94vw, 1680px);
-  grid-template-columns: minmax(110px, 12vw) minmax(0, 1fr) minmax(110px, 12vw);
-  gap: clamp(18px, 3vw, 56px);
-  margin-bottom: 0;
+.idle-title-box {
+  position: absolute;
+  top: clamp(118px, 15vh, 170px);
+  left: 50%;
+  z-index: 3;
+  display: block;
+  width: 100vw;
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 
-.idle-brand-strip .brand-badges {
-  justify-self: start;
-  width: min(170px, 9vw);
+.idle-badge-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
 }
 
-.idle-brand-strip .brand-u70 {
-  justify-self: end;
-  width: min(220px, 10vw);
+.idle-badge-layer .brand-badges {
+  position: fixed;
+  top: clamp(8px, 1.2vh, 18px);
+  left: clamp(22px, 2.6vw, 52px);
+  width: min(280px, 14vw);
 }
 
-.idle-brand-strip .brand-title-art {
-  width: min(100%, 1180px);
-  max-width: 100%;
+.idle-badge-layer .brand-u70 {
+  position: fixed;
+  top: clamp(8px, 1.2vh, 18px);
+  right: clamp(22px, 2.6vw, 52px);
+  width: min(330px, 15vw);
+}
+
+.idle-title-box .brand-title-art {
+  width: min(98vw, 1900px);
+  max-width: 98vw;
+  margin: 0 auto;
+  filter: drop-shadow(0 16px 36px rgba(80, 0, 0, 0.34)) drop-shadow(0 0 18px rgba(255, 215, 116, 0.18));
 }
 
 .idle-stage .gold-medallion {
-  margin-top: clamp(18px, 3vh, 34px);
+  margin-top: clamp(120px, 18vh, 220px);
 }
 
 .stage-kicker {
@@ -1249,23 +1265,30 @@ button {
     transform: scale(1.06);
   }
 
-  .idle-brand-strip {
-    grid-template-columns: 72px minmax(0, 1fr) 72px;
-    width: min(94vw, 620px);
-    gap: 12px;
+  .idle-title-box {
+    top: clamp(92px, 14vh, 124px);
+    width: 100vw;
   }
 
-  .idle-brand-strip .brand-badges {
-    width: 72px;
+  .idle-badge-layer .brand-badges {
+    top: 6px;
+    left: 12px;
+    width: clamp(78px, 22vw, 112px);
   }
 
-  .idle-brand-strip .brand-u70 {
-    width: 82px;
+  .idle-badge-layer .brand-u70 {
+    top: 6px;
+    right: 12px;
+    width: clamp(92px, 25vw, 132px);
   }
 
-  .idle-brand-strip .brand-title-art {
-    width: 100%;
-    max-width: 100%;
+  .idle-title-box .brand-title-art {
+    width: 98vw;
+    max-width: 98vw;
+  }
+
+  .idle-stage .gold-medallion {
+    margin-top: clamp(96px, 18vh, 150px);
   }
 
   .vote-brand-badges {

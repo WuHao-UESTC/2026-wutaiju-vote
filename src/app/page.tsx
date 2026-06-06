@@ -44,8 +44,22 @@ function StageOrnaments() {
 }
 
 function BrandStrip({ idle = false }: { idle?: boolean }) {
+  if (idle) {
+    return (
+      <>
+        <div className="idle-title-box" aria-label="活动主视觉标题">
+          <img src="/pic/main-k-title-cutout.png" alt="烽火岁月映芳华 峥嵘历程谱新篇" className="brand-title-art" />
+        </div>
+        <div className="idle-badge-layer" aria-label="活动徽章">
+          <img src="/pic/main-k-college-badges-cutout.png" alt="英才实验学院徽章" className="brand-badges" />
+          <img src="/pic/main-k-u70-cutout.png" alt="电子科技大学70周年校庆" className="brand-u70" />
+        </div>
+      </>
+    );
+  }
+
   return (
-    <div className={`brand-strip ${idle ? "idle-brand-strip" : ""}`} aria-label="活动主视觉元素">
+    <div className="brand-strip" aria-label="活动主视觉元素">
       <img src="/pic/main-k-college-badges-cutout.png" alt="英才实验学院徽章" className="brand-badges" />
       <img src="/pic/main-k-title-cutout.png" alt="烽火岁月映芳华 峥嵘历程谱新篇" className="brand-title-art" />
       <img src="/pic/main-k-u70-cutout.png" alt="电子科技大学70周年校庆" className="brand-u70" />
