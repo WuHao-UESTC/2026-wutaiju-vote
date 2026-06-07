@@ -14,28 +14,33 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ canVote: false, reason: "参数不完整" });
   }
 
-  const currentShowId = await getCurrentShow();
-  if (!currentShowId || currentShowId === FINAL_RESULTS_SHOW_ID) {
-    return NextResponse.json({ canVote: false, reason: "投票尚未开始或已经结束" });
-  }
-
-  if (currentShowId !== showId) {
-    return NextResponse.json({ canVote: false, reason: "当前节目未开放投票" });
-  }
-
-  const voted = await hasVoted(showId, voterToken);
-  const voterIdentityKeys = buildVoterIdentityKeys(request, deviceFingerprint);
-  let identityVoted = false;
-
-  for (const identityKey of voterIdentityKeys) {
-    if (await hasDeviceVoted(showId, identityKey)) {
-      identityVoted = true;
-      break;
+  try {
+    const currentShowId = await getCurrentShow();
+    if (!currentShowId || currentShowId === FINAL_RESULTS_SHOW_ID) {
+      return NextResponse.json({ canVote: false, reason: "投票尚未开始或已经结束" });
     }
-  }
 
-  return NextResponse.json({
-    canVote: !voted && !identityVoted,
-    reason: voted || identityVoted ? "您已经投过票了" : "",
-  });
+    if (currentShowId !== showId) {
+      return NextResponse.json({ canVote: false, reason: "当前节目未开放投票" });
+    }
+
+    const voted = await hasVoted(showId, voterToken);
+    const voterIdentityKeys = buildVoterIdentityKeys(request, deviceFingerprint);
+    let identityVoted = false;
+
+    for (const identityKey of voterIdentityKeys) {
+      if (await hasDeviceVoted(showId, identityKey)) {
+        identityVoted = true;
+        break;
+      }
+    }
+
+    return NextResponse.json({
+      canVote: !voted && !identityVoted,
+      reason: voted || identityVoted ? "您已经投过票了" : "",
+    });
+  } catch (err) {
+    console.error("Check vote error:", err);
+    return NextResponse.json({ canVote: false, reason: "投票服务暂时不可用" }, { status: 500 });
+  }
 }

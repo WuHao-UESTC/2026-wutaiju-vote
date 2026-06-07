@@ -148,8 +148,12 @@ export default function VotePage() {
         const json = await res.json();
         setError(json.error || "投票失败，请重试");
       }
-    } catch {
-      setError("网络错误，请重试");
+    } catch (err) {
+      if (err instanceof TypeError && err.message.includes("fetch")) {
+        setError("网络错误，请检查网络连接后重试");
+      } else {
+        setError("投票服务暂时不可用，请稍后重试");
+      }
     }
     setSubmitting(false);
   };

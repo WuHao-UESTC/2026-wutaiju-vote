@@ -2,7 +2,11 @@ import { Redis } from "@upstash/redis";
 import { mkdir, readFile, rename, writeFile } from "fs/promises";
 import path from "path";
 
-const localStorePath = path.join(process.cwd(), ".data", "vote-store.json");
+const localStorePath = path.join(
+  process.env.VERCEL ? "/tmp" : process.cwd(),
+  ".data",
+  "vote-store.json"
+);
 let localWriteQueue = Promise.resolve();
 let localCache: Record<string, string> | null = null;
 let redisClient: Redis | null | undefined;

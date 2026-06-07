@@ -37,13 +37,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "无法识别投票设备" }, { status: 400 });
   }
 
-  const result = await submitVote(showId, optionId, voterToken, voterIdentityKeys);
-  if (result === "duplicate") {
-    return NextResponse.json({ error: "您已经投过票了" }, { status: 409 });
+  try {
+    const result = await submitVote(showId, optionId, voterToken, voterIdentityKeys);
+    if (result === "duplicate") {
+      return NextResponse.json({ error: "您已经投过票了" }, { status: 409 });
+    }
+    if (result === "closed") {
+      return NextResponse.json({ error: "当前节目未开放投票" }, { status: 403 });
+    }
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("Vote submission error:", err);
+    return NextResponse.json({ error: "投票服务暂时不可用，请稍后重试" }, { status: 500 });
   }
-  if (result === "closed") {
-    return NextResponse.json({ error: "当前节目未开放投票" }, { status: 403 });
-  }
-
-  return NextResponse.json({ success: true });
 }
